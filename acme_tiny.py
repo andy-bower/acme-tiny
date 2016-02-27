@@ -24,9 +24,9 @@ def get_crt(account_key, csr, acme_dir, log=LOGGER, CA=DEFAULT_CA):
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise IOError("OpenSSL Error: {0}".format(err))
-    pub_hex, pub_exp = re.search(
-        r"modulus:\n\s+00:([a-f0-9\:\s]+?)\npublicExponent: ([0-9]+)",
-        out.decode('utf8'), re.MULTILINE|re.DOTALL).groups()
+    text_out = out.decode('utf8')
+    pub_hex = re.search(r"modulus:((?:\n\s+[^\n]+)+)", text_out).group(1)
+    pub_exp = re.search(r"publicExponent: (\d+)", text_out).group(1)
     pub_exp = "{0:x}".format(int(pub_exp))
     pub_exp = "0{0}".format(pub_exp) if len(pub_exp) % 2 else pub_exp
     header = {
